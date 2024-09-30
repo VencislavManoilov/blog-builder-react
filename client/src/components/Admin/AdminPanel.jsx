@@ -48,6 +48,7 @@ function AdminPanel() {
         return (
             <div>
                 <button onClick={() => {document.location.href = "/admin/create"}}>Create</button>
+
                 <h2>Page Structure</h2>
                 {structure == true ? renderStructure(structure) : <h3>Empty</h3>}
             </div>

@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import ContentEditable from 'react-contenteditable';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+
+const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 function Editor() {
     const [schema, setSchema] = useState([]);
     const [title, setTitle] = useState("Untitled Page");
+    const [path, setPath] = useState(""); // State for the path input
 
     // Adds new element to schema (text, image, video)
     const addElement = (type) => {
@@ -27,7 +31,7 @@ function Editor() {
     };
 
     // Generates static HTML file and saves the schema for future editing
-    const savePage = () => {
+    const savePage = async () => {
         // Create HTML string
         let htmlContent = `<html><head><title>${title}</title></head><body>`;
         schema.forEach(element => {
@@ -43,12 +47,26 @@ function Editor() {
 
         const schemaContent = { title, schema };
 
-        // Add request to the backend
+        // Send request to the backend to save the page
+        try {
+            await axios.post(URL+"/page", {
+                pagePath: path,
+                htmlContent,
+                schema: schemaContent
+            });
+            alert("Page saved successfully!");
+            setTitle("Untitled Page"); // Reset title
+            setSchema([]); // Reset schema
+            setPath(""); // Reset path
+        } catch (error) {
+            console.error("Error saving page:", error);
+            alert("Failed to save page.");
+        }
     };
 
     return (
         <div>
-            <button onClick={() => {document.location.href = "/admin"}}>Home</button>
+            <button onClick={() => { document.location.href = "/admin" }}>Home</button>
             <br />
             <br />
 
@@ -59,6 +77,13 @@ function Editor() {
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Page Title"
                     style={{ fontSize: "24px", marginBottom: "20px", display: "block" }}
+                />
+                <input
+                    type="text"
+                    value={path}
+                    onChange={(e) => setPath(e.target.value)}
+                    placeholder="Path (e.g., pateta or about-us/our-team)"
+                    style={{ marginBottom: "20px", display: "block" }}
                 />
                 <button onClick={() => addElement("text")}>Add Text</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
