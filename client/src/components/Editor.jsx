@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { saveAs } from 'file-saver'; // for saving files to the user's machine
-import ContentEditable from 'react-contenteditable'; // to allow content editing
-import { v4 as uuidv4 } from 'uuid'; // to generate unique IDs for elements
+import ContentEditable from 'react-contenteditable';
+import { v4 as uuidv4 } from 'uuid';
 
 function Editor() {
     const [schema, setSchema] = useState([]);
@@ -42,13 +41,33 @@ function Editor() {
         });
         htmlContent += `</body></html>`;
 
-        // Create a Blob from the HTML string and save the file
-        const blob = new Blob([htmlContent], { type: "text/html" });
-        saveAs(blob, `${title}.html`);
+        const schemaContent = { title, schema };
 
-        // Save the schema as a JSON file for future editing
-        const schemaBlob = new Blob([JSON.stringify({ title, schema })], { type: "application/json" });
-        saveAs(schemaBlob, `${title}_schema.json`);
+        // Add request to the backend
+
+        // // Path to save the file in the backend/website directory
+        // const websiteDir = path.join(__dirname, "../../website");
+        // const htmlFilePath = path.join(websiteDir, `${title}.html`);
+        // const schemaFilePath = path.join(websiteDir, `${title}_schema.json`);
+
+        // try {
+        //     // Ensure the backend/website directory exists
+        //     if (!fs.existsSync(websiteDir)) {
+        //         fs.mkdirSync(websiteDir, { recursive: true });
+        //     }
+
+        //     // Write the HTML file
+        //     fs.writeFileSync(htmlFilePath, htmlContent, "utf-8");
+
+        //     // Write the schema JSON file
+        //     fs.writeFileSync(schemaFilePath, JSON.stringify(schemaContent, null, 2), "utf-8");
+
+        //     alert("Page saved successfully!");
+
+        // } catch (error) {
+        //     console.error("Error saving page:", error);
+        //     alert("Error saving page.");
+        // }
     };
 
     return (
