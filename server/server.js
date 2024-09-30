@@ -2,12 +2,19 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 const PORT = 8080;
 
 // Middleware for parsing JSON requests
 app.use(bodyParser.json());
+
+// Setting the CORS Policy
+app.use(cors({
+    origin: "*",
+    optionsSuccessStatus: 200
+}));
 
 // Directory for storing pages
 const UPLOADS_DIR = path.join(__dirname, "uploads");
@@ -37,7 +44,6 @@ function GetStructure() {
     }
 
     scanDirectory(UPLOADS_DIR, "/");
-    console.log("Page Structure Loaded:", structure);
     return structure;
 }
 
@@ -68,5 +74,5 @@ app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
     
     // Load the structure at startup
-    GetStructure();
+    console.log(GetStructure());
 });
