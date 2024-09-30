@@ -30,21 +30,53 @@ function GetStructure() {
 
     function scanDirectory(dir, currentPath) {
         const items = fs.readdirSync(dir, { withFileTypes: true });
+        const contents = [];
+        let isFile = false;
 
         items.forEach(item => {
+            const subPath = path.join(currentPath, item.name);
+
             if (item.isDirectory()) {
-                const subPath = path.join(currentPath, item.name);
-                structure[subPath] = { type: "directory" };
-                scanDirectory(path.join(dir, item.name), subPath); // Recurse into subdirectory
-            } else if (item.name === "index.html") {
-                const pagePath = currentPath;
-                structure[pagePath] = { type: "file" };
+                // Recursively scan the subdirectory and add its name to contents
+                scanDirectory(path.join(dir, item.name), subPath);
+                contents.push(item.name);
+            } else if (item.name === "index.html" || item.name === "schema.json") {
+                // If the directory contains index.html or schema.json, mark it as a file
+                isFile = true;
             }
         });
+
+        if (isFile) {
+            structure[currentPath] = { type: 'file' };
+        } else if (contents.length > 0) {
+            structure[currentPath] = {
+                type: 'directory',
+                contents: contents
+            };
+        }
     }
 
+    // Start scanning from the root directory
     scanDirectory(UPLOADS_DIR, "/");
-    return structure;
+
+    // Clean up the structure: removing any directory's files that are already listed in contents
+    const finalStructure = {};
+
+    Object.keys(structure).forEach(key => {
+        // Skip the root directory "/"
+        if (key === "/") return;
+
+        if (structure[key].type === 'file' || structure[key].type === 'directory') {
+            // Avoid adding subdirectories that are already in their parent's contents
+            const parentPath = path.dirname(key);
+            if (structure[parentPath]?.contents?.includes(path.basename(key))) {
+                return;
+            }
+            finalStructure[key] = structure[key];
+        }
+    });
+
+    return finalStructure;
 }
 
 // Serve static HTML pages based on path
