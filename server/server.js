@@ -59,7 +59,10 @@ app.get("/structure", (req, res) => {
 
 // POST request to create/save a new page with schema and HTML content
 const CreatePage = require("./routes/CreatePage");
-app.use("/page", CreatePage);
+app.use("/page", (req, res, next) => {
+    req.UPLOADS_DIR = UPLOADS_DIR;
+    next();
+}, CreatePage);
 
 // POST request to edit an existing page
 const EditPage = require("./routes/EditPage");

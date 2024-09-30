@@ -1,14 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const path = require("path");
+const fs = require("fs");
 
 router.post("/", (req, res) => {
-    const { path: pagePath, htmlContent, schema } = req.body;
+    const { pagePath, htmlContent, schema } = req.body;
 
     if (!pagePath || !htmlContent || !schema) {
         return res.status(400).json({ error: "Missing page path, HTML content, or schema." });
     }
 
-    const fullPath = path.join(UPLOADS_DIR, pagePath);
+    const fullPath = path.join(req.UPLOADS_DIR, pagePath);
     const htmlFilePath = path.join(fullPath, "index.html");
     const schemaFilePath = path.join(fullPath, "schema.json");
 
