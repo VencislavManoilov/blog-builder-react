@@ -44,30 +44,6 @@ function Editor() {
         const schemaContent = { title, schema };
 
         // Add request to the backend
-
-        // // Path to save the file in the backend/website directory
-        // const websiteDir = path.join(__dirname, "../../website");
-        // const htmlFilePath = path.join(websiteDir, `${title}.html`);
-        // const schemaFilePath = path.join(websiteDir, `${title}_schema.json`);
-
-        // try {
-        //     // Ensure the backend/website directory exists
-        //     if (!fs.existsSync(websiteDir)) {
-        //         fs.mkdirSync(websiteDir, { recursive: true });
-        //     }
-
-        //     // Write the HTML file
-        //     fs.writeFileSync(htmlFilePath, htmlContent, "utf-8");
-
-        //     // Write the schema JSON file
-        //     fs.writeFileSync(schemaFilePath, JSON.stringify(schemaContent, null, 2), "utf-8");
-
-        //     alert("Page saved successfully!");
-
-        // } catch (error) {
-        //     console.error("Error saving page:", error);
-        //     alert("Error saving page.");
-        // }
     };
 
     return (
