@@ -42,16 +42,8 @@ function GetStructure() {
 }
 
 // Serve static HTML pages based on path
-app.get("/page/:pagePath*", (req, res) => {
-    const pagePath = req.params.pagePath + (req.params[0] || "");
-    const htmlFilePath = path.join(UPLOADS_DIR, pagePath, "index.html");
-
-    if (fs.existsSync(htmlFilePath)) {
-        res.sendFile(htmlFilePath);
-    } else {
-        res.status(404).json({ error: "Page not found" });
-    }
-});
+const GetPage = require("./routes/GetPage");
+app.use("/page", GetPage);
 
 // Get the full directory structure
 app.get("/structure", (req, res) => {
@@ -60,66 +52,16 @@ app.get("/structure", (req, res) => {
 });
 
 // POST request to create/save a new page with schema and HTML content
-app.post("/page", (req, res) => {
-    const { path: pagePath, htmlContent, schema } = req.body;
-
-    if (!pagePath || !htmlContent || !schema) {
-        return res.status(400).json({ error: "Missing page path, HTML content, or schema." });
-    }
-
-    const fullPath = path.join(UPLOADS_DIR, pagePath);
-    const htmlFilePath = path.join(fullPath, "index.html");
-    const schemaFilePath = path.join(fullPath, "schema.json");
-
-    if (!fs.existsSync(fullPath)) {
-        fs.mkdirSync(fullPath, { recursive: true });
-    }
-
-    fs.writeFileSync(htmlFilePath, htmlContent);
-    fs.writeFileSync(schemaFilePath, JSON.stringify(schema, null, 2));
-
-    res.status(201).json({ message: "Page created successfully." });
-});
+const CreatePage = require("./routes/CreatePage");
+app.use("/page", CreatePage);
 
 // POST request to edit an existing page
-app.post("/page/edit", (req, res) => {
-    const { path: pagePath, htmlContent, schema } = req.body;
-
-    if (!pagePath || !htmlContent || !schema) {
-        return res.status(400).json({ error: "Missing page path, HTML content, or schema." });
-    }
-
-    const fullPath = path.join(UPLOADS_DIR, pagePath);
-    const htmlFilePath = path.join(fullPath, "index.html");
-    const schemaFilePath = path.join(fullPath, "schema.json");
-
-    if (!fs.existsSync(htmlFilePath) || !fs.existsSync(schemaFilePath)) {
-        return res.status(404).json({ error: "Page not found." });
-    }
-
-    fs.writeFileSync(htmlFilePath, htmlContent);
-    fs.writeFileSync(schemaFilePath, JSON.stringify(schema, null, 2));
-
-    res.status(200).json({ message: "Page edited successfully." });
-});
+const EditPage = require("./routes/EditPage");
+app.use("/page/edit", EditPage);
 
 // DELETE request to delete a page
-app.delete("/page", (req, res) => {
-    const { path: pagePath } = req.body;
-
-    if (!pagePath) {
-        return res.status(400).json({ error: "Missing page path." });
-    }
-
-    const fullPath = path.join(UPLOADS_DIR, pagePath);
-    
-    if (fs.existsSync(fullPath)) {
-        fs.rmSync(fullPath, { recursive: true, force: true });
-        return res.status(200).json({ message: "Page deleted successfully." });
-    } else {
-        return res.status(404).json({ error: "Page not found." });
-    }
-});
+const DeletePage = require("./routes/DeletePage");
+app.use("/delete/page", DeletePage);
 
 // Start the server
 app.listen(PORT, () => {
