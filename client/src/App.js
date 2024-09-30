@@ -17,7 +17,7 @@ function App() {
         <Route path="/" element={<Showfile />} />
         
         <Route 
-          path="/admin" 
+          path="/admin/*" 
           element={
             <PrivateRoute>
               <AdminPanel />

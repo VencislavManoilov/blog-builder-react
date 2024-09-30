@@ -48,6 +48,10 @@ function Editor() {
 
     return (
         <div>
+            <button onClick={() => {document.location.href = "/admin"}}>Home</button>
+            <br />
+            <br />
+
             <div>
                 <input
                     type="text"
