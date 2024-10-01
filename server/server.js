@@ -80,8 +80,16 @@ function GetStructure() {
 }
 
 // Serve static HTML pages based on path
-const GetPage = require("./routes/GetPage");
-app.use("/page", GetPage);
+app.get("/page-get", (req, res) => {
+    const pagePath = req.query.pagePath + (req.query[0] || "");
+    const htmlFilePath = path.join(UPLOADS_DIR, pagePath, "index.html");
+
+    if (fs.existsSync(htmlFilePath)) {
+        res.sendFile(htmlFilePath);
+    } else {
+        res.status(404).json({ error: "Page not found" });
+    }
+});
 
 // Get the full directory structure
 app.get("/structure", (req, res) => {
