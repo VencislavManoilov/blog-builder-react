@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AdminPanel from './components/Admin/AdminPanel';
-import Showfile from './components/Showfile';
+import Page from './components/Page';
 
 const isAuthenticated = () => {
   return true;
@@ -14,7 +14,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Showfile />} />
+        <Route path="/" element={<Page />} />
+
+        <Route path="/page/*" element={<Page />} />
         
         <Route 
           path="/admin/*" 

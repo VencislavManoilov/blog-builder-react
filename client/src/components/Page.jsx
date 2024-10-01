@@ -1,4 +1,5 @@
-function Showfile() {
+function Page() {
+
     return (
         <div>
             Hello Clients!
@@ -6,4 +7,4 @@ function Showfile() {
     );
 }
 
-export default Showfile;
+export default Page;
