@@ -13,10 +13,12 @@ function Page() {
       try {
         // Extracting the dynamic part of the path after "/page/"
         const pagePath = location.pathname.replace('/page/', '');
+        
+        const path = pagePath == "/" ? "index" : pagePath;
 
         // Make a GET request to your backend with the pagePath
         const response = await axios.get(`${URL}/page-get`, {
-          params: { pagePath }
+          params: { pagePath: path }
         });
 
         // Set the response data (HTML) to state
