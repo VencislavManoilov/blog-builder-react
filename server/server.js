@@ -81,7 +81,7 @@ function GetStructure() {
 
 // Serve static HTML pages based on path
 app.get("/page-get", (req, res) => {
-    const pagePath = req.query.pagePath + (req.query[0] || "");
+    const pagePath = req.query.pagePath;
     const htmlFilePath = path.join(UPLOADS_DIR, pagePath, "index.html");
 
     if (fs.existsSync(htmlFilePath)) {
