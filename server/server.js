@@ -91,6 +91,25 @@ app.get("/page-get", (req, res) => {
     }
 });
 
+// Serve the page's schema
+app.get("/page-get-schema", (req, res) => {
+    const pagePath = req.query.pagePath;
+    const schemaFilePath = path.join(UPLOADS_DIR, pagePath, "schema.json");
+
+    if(fs.existsSync(schemaFilePath)) {
+        try {
+            const schemaContent = fs.readFileSync(schemaFilePath, 'utf-8');
+            res.status(200).json({
+                schema: JSON.parse(schemaContent)
+            });
+        } catch (error) {
+            res.status(500).json({ error: "Error reading schema" });
+        }
+    } else {
+        res.status(404).json({ error: "Schema not found" });
+    }
+})
+
 // Get the full directory structure
 app.get("/structure", (req, res) => {
     const structure = GetStructure();
@@ -107,6 +126,12 @@ app.use("/page", (req, res, next) => {
 // POST request to edit an existing page
 const EditPage = require("./routes/EditPage");
 app.use("/page/edit", EditPage);
+
+const RenamePage = require("./routes/RenamePage");
+app.use("/page/rename", (req, res, next) => {
+    req.UPLOADS_DIR = UPLOADS_DIR;
+    next();
+}, RenamePage);
 
 // DELETE request to delete a page
 const DeletePage = require("./routes/DeletePage");
