@@ -21,43 +21,68 @@ function AdminPanel() {
         fetchStructure();
     }, []);
 
+    // Function to rename a file or directory
+    const handleRename = async (oldPath) => {
+        const newName = prompt("Enter the new name for the file or directory:");
+        if (!newName) {
+            return; // If no name is entered, do nothing
+        }
+
+        const newPath = oldPath.substring(0, oldPath.lastIndexOf("/") + 1) + newName;
+
+        try {
+            await axios.put(`${URL}/page/rename`, {
+                oldPagePath: oldPath,
+                newPagePath: newPath,
+            });
+            alert("Renamed successfully!");
+            // Fetch the updated structure after renaming
+            const response = await axios.get(`${URL}/structure`);
+            setStruct(response.data);
+        } catch (err) {
+            console.error("Error renaming:", err);
+            alert("Error renaming file or directory.");
+        }
+    };
+
     const renderStructure = (struct) => {
         return Object.entries(struct).map(([path, info]) => {
             // Replace backslashes with forward slashes for consistency
             const cleanPath = path.replace(/\\/g, '/');
     
-            // If it's a directory, display its name and contents
             if (info.type === "directory") {
                 return (
                     <div key={cleanPath}>
-                        {/* Display directory name without a link */}
+                        {/* Display directory name */}
                         <strong>{cleanPath}:</strong>
+                        <button onClick={() => handleRename(cleanPath)}>Rename</button>
                         <div style={{ paddingLeft: "20px" }}>
-                            {/* Render subdirectories and files as links */}
+                            {/* Render subdirectories and files */}
                             {info.contents && info.contents.map((fileName) => {
                                 const fullPath = `${cleanPath}/${fileName}`;
                                 return (
                                     <div key={fullPath}>
-                                        {/* Render file or subdirectory name as a link */}
                                         <a href={`/page${fullPath}`}>{fileName}</a>
+                                        <button onClick={() => handleRename(fullPath)}>Rename</button>
+                                        <button onClick={() => {document.location.href = `/admin/edit${fullPath}`}}>Edit</button>
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
                 );
-            } 
-            // If it's a file, display it directly as a link
-            else if (info.type === "file") {
+            } else if (info.type === "file") {
                 return (
                     <div key={cleanPath}>
                         <a href={`/page${cleanPath}`}>{cleanPath}</a>
+                        <button onClick={() => handleRename(cleanPath)}>Rename</button>
+                        <button onClick={() => {document.location.href = `/admin/edit${cleanPath}`}}>Edit</button>
                     </div>
                 );
             }
             return null;
         });
-    };    
+    };
 
     const Structure = () => {
         return (
@@ -77,9 +102,10 @@ function AdminPanel() {
             <Routes>
                 <Route path="/" element={<Structure />} />
                 <Route path="/create" element={<Editor />} />
+                <Route path="/edit/*" element={<Editor />} />
             </Routes>
         </div>
-    )
-};
+    );
+}
 
 export default AdminPanel;
