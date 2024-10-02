@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import ContentEditable from 'react-contenteditable';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
@@ -6,9 +7,28 @@ import axios from 'axios';
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 function Editor() {
+    const { '*': editPath } = useParams();
+
     const [schema, setSchema] = useState([]);
     const [title, setTitle] = useState("Untitled Page");
-    const [path, setPath] = useState(""); // State for the path input
+    const [path, setPath] = useState("");
+
+    useEffect(() => {
+        if (editPath) {
+            const fetchPage = async () => {
+                try {
+                    const response = await axios.get(`${URL}/page-get-schema?pagePath=${editPath}`);
+                    setSchema(response.data.schema.schema);
+                    setTitle(response.data.schema.title);
+                } catch (error) {
+                    console.error("Error fetching page content:", error);
+                }
+            };
+
+            fetchPage();
+            setPath(editPath);
+        }
+    }, [editPath]);
 
     // Adds new element to schema (text, image, video)
     const addElement = (type) => {
