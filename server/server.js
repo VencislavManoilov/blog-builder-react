@@ -125,7 +125,10 @@ app.use("/page", (req, res, next) => {
 
 // POST request to edit an existing page
 const EditPage = require("./routes/EditPage");
-app.use("/page/edit", EditPage);
+app.use("/page/edit", (req, res, next) => {
+    req.UPLOADS_DIR = UPLOADS_DIR;
+    next();
+}, EditPage);
 
 const RenamePage = require("./routes/RenamePage");
 app.use("/page/rename", (req, res, next) => {
@@ -135,7 +138,10 @@ app.use("/page/rename", (req, res, next) => {
 
 // DELETE request to delete a page
 const DeletePage = require("./routes/DeletePage");
-app.use("/delete/page", DeletePage);
+app.use("/delete/page", (req, res, next) => {
+    req.UPLOADS_DIR = UPLOADS_DIR;
+    next();
+}, DeletePage);
 
 // Start the server
 app.listen(PORT, () => {
