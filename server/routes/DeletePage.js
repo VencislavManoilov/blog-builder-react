@@ -1,14 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const path = require("path");
+const fs = require("fs");
 
 router.delete("/", (req, res) => {
-    const { path: pagePath } = req.body;
+    const { pagePath } = req.query;
 
     if (!pagePath) {
         return res.status(400).json({ error: "Missing page path." });
     }
 
-    const fullPath = path.join(UPLOADS_DIR, pagePath);
+    const fullPath = path.join(req.UPLOADS_DIR, pagePath);
     
     if (fs.existsSync(fullPath)) {
         fs.rmSync(fullPath, { recursive: true, force: true });
