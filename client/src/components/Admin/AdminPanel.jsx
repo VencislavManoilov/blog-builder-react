@@ -45,6 +45,36 @@ function AdminPanel() {
         }
     };
 
+    const handleDelete = async (pagePath) => {
+        if(window.confirm("Are you sure?") == false) {
+            return;
+        }
+
+        if(!pagePath) {
+            return;
+        }
+
+        let path = pagePath;
+
+        if(pagePath[0] == "/") {
+            path = pagePath.slice(1);
+        }
+
+        try {
+            await axios.delete(URL+"/delete/page", {
+                params: {pagePath: path}
+            });
+
+            alert("Deleted successfully");
+
+            const response = await axios.get(`${URL}/structure`);
+            setStruct(response.data);
+        } catch (err) {
+            console.error("Error deleting:", err);
+            alert("Error deleting file or directory");
+        }
+    }
+
     const renderStructure = (struct) => {
         return Object.entries(struct).map(([path, info]) => {
             // Replace backslashes with forward slashes for consistency
@@ -56,6 +86,7 @@ function AdminPanel() {
                         {/* Display directory name */}
                         <strong>{cleanPath}:</strong>
                         <button onClick={() => handleRename(cleanPath)}>Rename</button>
+                        <button onClick={() => handleDelete(cleanPath)}>Delete</button>
                         <div style={{ paddingLeft: "20px" }}>
                             {/* Render subdirectories and files */}
                             {info.contents && info.contents.map((fileName) => {
@@ -65,6 +96,7 @@ function AdminPanel() {
                                         <a href={`/page${fullPath}`}>{fileName}</a>
                                         <button onClick={() => handleRename(fullPath)}>Rename</button>
                                         <button onClick={() => {document.location.href = `/admin/edit${fullPath}`}}>Edit</button>
+                                        <button onClick={() => handleDelete(fullPath)}>Delete</button>
                                     </div>
                                 );
                             })}
@@ -77,6 +109,7 @@ function AdminPanel() {
                         <a href={`/page${cleanPath}`}>{cleanPath}</a>
                         <button onClick={() => handleRename(cleanPath)}>Rename</button>
                         <button onClick={() => {document.location.href = `/admin/edit${cleanPath}`}}>Edit</button>
+                        <button onClick={() => handleDelete(cleanPath)}>Delete</button>
                     </div>
                 );
             }
@@ -101,8 +134,8 @@ function AdminPanel() {
             <h1>Admin Panel</h1>
             <Routes>
                 <Route path="/" element={<Structure />} />
-                <Route path="/create" element={<Editor />} />
-                <Route path="/edit/*" element={<Editor />} />
+                <Route path="/create" element={<Editor structure={structure} />} />
+                <Route path="/edit/*" element={<Editor structure={structure} />} />
             </Routes>
         </div>
     );

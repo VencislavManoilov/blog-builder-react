@@ -6,15 +6,17 @@ import axios from 'axios';
 
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
-function Editor() {
+function Editor(structure) {
     const { '*': editPath } = useParams();
 
     const [schema, setSchema] = useState([]);
     const [title, setTitle] = useState("Untitled Page");
     const [path, setPath] = useState("");
 
+    const [menus, setMenus] = useState([]);
+
     useEffect(() => {
-        if (editPath) {
+        if(editPath && editPath != "create") {
             const fetchPage = async () => {
                 try {
                     const response = await axios.get(`${URL}/page-get-schema?pagePath=${editPath}`);
@@ -30,12 +32,26 @@ function Editor() {
         }
     }, [editPath]);
 
+    useEffect(() => {
+        function GetMenus() {
+            const directoryNames = Object.entries(structure.structure)
+            .filter(([key, value]) => value.type === "directory")
+            .map(([key]) => key);
+    
+            console.log(structure);
+            console.log(Object.values(structure));
+            setMenus(directoryNames);
+        }
+
+        GetMenus();
+    }, [structure]);
+
     // Adds new element to schema (text, image, video)
     const addElement = (type) => {
         const newElement = {
             id: uuidv4(),
             type,
-            content: type === "text" ? "Enter your text" : type === "image" ? "Image URL" : "Video URL",
+            content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "menu" ? "Select Menu" : type === "image" ? "Image URL" : "Video URL",
         };
         setSchema([...schema, newElement]);
     };
@@ -55,7 +71,9 @@ function Editor() {
         // Create HTML string
         let htmlContent = `<html><head><title>${title}</title></head><body>`;
         schema.forEach(element => {
-            if (element.type === "text") {
+            if(element.type == "title") {
+                htmlContent += `<h2>${element.content}</h2>`;
+            } if (element.type === "text") {
                 htmlContent += `<p>${element.content}</p>`;
             } else if (element.type === "image") {
                 htmlContent += `<img src="${element.content}" alt="image" />`;
@@ -69,7 +87,8 @@ function Editor() {
 
         // Send request to the backend to save the page
         try {
-            await axios.post(URL+"/page", {
+            const editUrl = (editPath == "create") ? URL+"/page" : URL+"/page/edit"
+            await axios.post(editUrl, {
                 pagePath: path,
                 htmlContent,
                 schema: schemaContent
@@ -105,7 +124,9 @@ function Editor() {
                     placeholder="Path (e.g., pateta or about-us/our-team)"
                     style={{ marginBottom: "20px", display: "block" }}
                 />
+                <button onClick={() => addElement("title")}>Add Title</button>
                 <button onClick={() => addElement("text")}>Add Text</button>
+                <button onClick={() => addElement("menu")}>Add Menu</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
                 <button onClick={() => addElement("video")}>Add Video</button>
                 <button onClick={savePage}>Save Page</button>
@@ -114,12 +135,27 @@ function Editor() {
             <div>
                 {schema.map((element) => (
                     <div key={element.id} style={{ marginBottom: "20px" }}>
+                        {element.type === "title" && (
+                            <ContentEditable
+                                html={element.content}
+                                onChange={(e) => updateElement(element.id, e.target.value)}
+                                tagName="h2"
+                            />
+                        )}
                         {element.type === "text" && (
                             <ContentEditable
                                 html={element.content}
                                 onChange={(e) => updateElement(element.id, e.target.value)}
                                 tagName="p"
                             />
+                        )}
+                        {element.type === "menu" && (
+                            <div>
+                                <label htmlFor={element.id}>{element.content}</label>
+                                <select id={element.id} value={""} onChange={(e) => updateElement(element.id, e.target.value)}>
+                                    {}
+                                </select>
+                            </div>
                         )}
                         {element.type === "image" && (
                             <div>
