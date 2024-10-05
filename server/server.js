@@ -83,9 +83,19 @@ function GetStructure() {
 app.get("/page-get", (req, res) => {
     const pagePath = req.query.pagePath;
     const htmlFilePath = path.join(UPLOADS_DIR, pagePath, "index.html");
+    const schemaFilePath = path.join(UPLOADS_DIR, pagePath, "schema.json");
 
-    if (fs.existsSync(htmlFilePath)) {
-        res.sendFile(htmlFilePath);
+    if (pagePath && fs.existsSync(htmlFilePath) && fs.existsSync(schemaFilePath)) {
+        try {
+            const htmlFileContent = fs.readFileSync(htmlFilePath, 'utf-8');
+            const schemaContent = JSON.parse(fs.readFileSync(schemaFilePath, 'utf-8')).title;
+            res.status(200).json({
+                content: htmlFileContent,
+                title: schemaContent
+            });
+        } catch (error) {
+            res.status(500).json({ error: "Error reading schema" });
+        }
     } else {
         res.status(404).json({ error: "Page not found" });
     }
