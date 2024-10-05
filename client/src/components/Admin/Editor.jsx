@@ -6,17 +6,15 @@ import axios from 'axios';
 
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
-function Editor(structure) {
+function Editor({ structure }) {
     const { '*': editPath } = useParams();
 
     const [schema, setSchema] = useState([]);
     const [title, setTitle] = useState("Untitled Page");
     const [path, setPath] = useState("");
 
-    const [menus, setMenus] = useState([]);
-
     useEffect(() => {
-        if(editPath && editPath != "create") {
+        if (editPath && editPath !== "create") {
             const fetchPage = async () => {
                 try {
                     const response = await axios.get(`${URL}/page-get-schema?pagePath=${editPath}`);
@@ -32,33 +30,37 @@ function Editor(structure) {
         }
     }, [editPath]);
 
-    useEffect(() => {
-        function GetMenus() {
-            const directoryNames = Object.entries(structure.structure)
-            .filter(([key, value]) => value.type === "directory")
-            .map(([key]) => key);
-    
-            console.log(structure);
-            console.log(Object.values(structure));
-            setMenus(directoryNames);
-        }
-
-        GetMenus();
-    }, [structure]);
-
-    // Adds new element to schema (text, image, video)
+    // Adds new element to schema (text, image, video, menu)
     const addElement = (type) => {
-        const newElement = {
-            id: uuidv4(),
-            type,
-            content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "menu" ? "Select Menu" : type === "image" ? "Image URL" : "Video URL",
-        };
+        let newElement;
+
+        if (type === "menu") {
+            newElement = {
+                id: uuidv4(),
+                type,
+                content: [], // Will hold the directory's page names
+                selectedDirectory: "", // Stores the selected directory
+            };
+        } else {
+            newElement = {
+                id: uuidv4(),
+                type,
+                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "image" ? "Image URL" : "Video URL",
+            };
+        }
+        
         setSchema([...schema, newElement]);
     };
 
     // Updates the content of an element in the schema
     const updateElement = (id, newContent) => {
         setSchema(schema.map(el => el.id === id ? { ...el, content: newContent } : el));
+    };
+
+    // Handles the selection of a directory for the menu
+    const selectDirectory = (id, directory) => {
+        const contents = structure[directory]?.contents || [];
+        setSchema(schema.map(el => el.id === id ? { ...el, selectedDirectory: directory, content: contents } : el));
     };
 
     // Deletes an element from the schema
@@ -71,23 +73,34 @@ function Editor(structure) {
         // Create HTML string
         let htmlContent = `<html><head><title>${title}</title></head><body>`;
         schema.forEach(element => {
-            if(element.type == "title") {
+            if (element.type === "title") {
                 htmlContent += `<h2>${element.content}</h2>`;
-            } if (element.type === "text") {
-                htmlContent += `<p>${element.content}</p>`;
+            } else if (element.type === "text") {
+                htmlContent += element.content.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
             } else if (element.type === "image") {
                 htmlContent += `<img src="${element.content}" alt="image" />`;
             } else if (element.type === "video") {
                 htmlContent += `<video src="${element.content}" controls></video>`;
+            } else if (element.type === "menu") {
+                if (element.content.length > 0) {
+                    htmlContent += `<select onchange="location.href=this.value;">`;
+                    htmlContent += `<option value="">${element.selectedDirectory.slice(1)}</option>`
+                    element.content.forEach(page => {
+                        htmlContent += `<option value="/page${element.selectedDirectory}/${page}">${page}</option>`;
+                    });
+                    htmlContent += `</select>`;
+                }
             }
         });
         htmlContent += `</body></html>`;
+
+        htmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         const schemaContent = { title, schema };
 
         // Send request to the backend to save the page
         try {
-            const editUrl = (editPath == "create") ? URL+"/page" : URL+"/page/edit"
+            const editUrl = (editPath === "create") ? `${URL}/page` : `${URL}/page/edit`;
             await axios.post(editUrl, {
                 pagePath: path,
                 htmlContent,
@@ -126,9 +139,9 @@ function Editor(structure) {
                 />
                 <button onClick={() => addElement("title")}>Add Title</button>
                 <button onClick={() => addElement("text")}>Add Text</button>
-                <button onClick={() => addElement("menu")}>Add Menu</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
                 <button onClick={() => addElement("video")}>Add Video</button>
+                <button onClick={() => addElement("menu")}>Add Menu</button>
                 <button onClick={savePage}>Save Page</button>
             </div>
 
@@ -148,14 +161,6 @@ function Editor(structure) {
                                 onChange={(e) => updateElement(element.id, e.target.value)}
                                 tagName="p"
                             />
-                        )}
-                        {element.type === "menu" && (
-                            <div>
-                                <label htmlFor={element.id}>{element.content}</label>
-                                <select id={element.id} value={""} onChange={(e) => updateElement(element.id, e.target.value)}>
-                                    {}
-                                </select>
-                            </div>
                         )}
                         {element.type === "image" && (
                             <div>
@@ -177,6 +182,26 @@ function Editor(structure) {
                                     placeholder="Video URL"
                                 />
                                 <video src={element.content} controls style={{ width: "300px", height: "auto" }} />
+                            </div>
+                        )}
+                        {element.type === "menu" && (
+                            <div>
+                                <label>Select Directory: </label>
+                                <select value={element.selectedDirectory} onChange={(e) => selectDirectory(element.id, e.target.value)}>
+                                    <option value="">Select a directory</option>
+                                    {Object.keys(structure).map((dir) => (
+                                        structure[dir].type === "directory" && (
+                                            <option key={dir} value={dir}>{dir}</option>
+                                        )
+                                    ))}
+                                </select>
+                                {element.content.length > 0 && (
+                                    <ul>
+                                        {element.content.map((page, index) => (
+                                            <li key={index}>{page}</li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
                         )}
                         <button onClick={() => deleteElement(element.id)}>Delete</button>
