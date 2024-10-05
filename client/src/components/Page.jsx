@@ -43,6 +43,7 @@ const MenuSections = () => {
 
 function Page() {
   const [pageContent, setPageContent] = useState('Loading...');
+  const [title, setTitle] = useState("Blog");
   const location = useLocation(); // To get the current path
 
   useEffect(() => {
@@ -59,7 +60,8 @@ function Page() {
         });
 
         // Set the response data (HTML) to state
-        setPageContent(content.data);
+        setPageContent(content.data.content);
+        setTitle(content.data.title);
       } catch (error) {
         console.error('Error fetching page content:', error);
         setPageContent('<p>Failed to load page content.</p>');
@@ -72,6 +74,8 @@ function Page() {
   return (
     <div>
       <MenuSections />
+
+      <h1>{title}</h1>
 
       <div dangerouslySetInnerHTML={{ __html: pageContent }} />
     </div>
