@@ -30,6 +30,12 @@ function Editor({ structure }) {
         }
     }, [editPath]);
 
+    const decodeHTML = (html) => {
+        const textArea = document.createElement("textarea");
+        textArea.innerHTML = html;
+        return textArea.value;
+    };
+
     // Adds new element to schema (text, image, video, menu)
     const addElement = (type) => {
         let newElement;
@@ -45,7 +51,7 @@ function Editor({ structure }) {
             newElement = {
                 id: uuidv4(),
                 type,
-                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "image" ? "Image URL" : "Video URL",
+                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ? "Enter your html" : type === "image" ? "Image URL" : "Video URL",
             };
         }
         
@@ -76,7 +82,9 @@ function Editor({ structure }) {
             if (element.type === "title") {
                 htmlContent += `<h2>${element.content}</h2>`;
             } else if (element.type === "text") {
-                htmlContent += element.content.replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+                htmlContent += element.content;
+            } else if (element.type === "html") {
+                htmlContent += decodeHTML(element.content);
             } else if (element.type === "image") {
                 htmlContent += `<img src="${element.content}" alt="image" />`;
             } else if (element.type === "video") {
@@ -139,6 +147,7 @@ function Editor({ structure }) {
                 />
                 <button onClick={() => addElement("title")}>Add Title</button>
                 <button onClick={() => addElement("text")}>Add Text</button>
+                <button onClick={() => addElement("html")}>Add html</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
                 <button onClick={() => addElement("video")}>Add Video</button>
                 <button onClick={() => addElement("menu")}>Add Menu</button>
@@ -156,6 +165,13 @@ function Editor({ structure }) {
                             />
                         )}
                         {element.type === "text" && (
+                            <ContentEditable
+                                html={element.content}
+                                onChange={(e) => updateElement(element.id, e.target.value)}
+                                tagName="p"
+                            />
+                        )}
+                        {element.type === "html" && (
                             <ContentEditable
                                 html={element.content}
                                 onChange={(e) => updateElement(element.id, e.target.value)}
