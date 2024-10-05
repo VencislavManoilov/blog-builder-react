@@ -77,7 +77,7 @@ function Editor({ structure }) {
     // Generates static HTML file and saves the schema for future editing
     const savePage = async () => {
         // Create HTML string
-        let htmlContent = `<html><head><title>${title}</title></head><body>`;
+        let htmlContent = ``;
         schema.forEach(element => {
             if (element.type === "title") {
                 htmlContent += `<h2>${element.content}</h2>`;
@@ -100,9 +100,6 @@ function Editor({ structure }) {
                 }
             }
         });
-        htmlContent += `</body></html>`;
-
-        htmlContent.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         const schemaContent = { title, schema };
 
