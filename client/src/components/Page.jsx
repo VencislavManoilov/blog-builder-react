@@ -4,6 +4,43 @@ import axios from 'axios';
 
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
+const MenuSections = () => {
+  const [structure, setStruct] = useState(false)
+
+  useEffect(() => {
+    const getStruct = async () => {
+      try {
+        const schema = await axios.get(`${URL}/structure`);
+        setStruct(schema.data);
+      } catch(err) {
+        console.log("Error:", err);
+      }
+    }
+
+    getStruct();
+  }, [])
+
+  return (
+    <>
+      {Object.keys(structure).map((dir) => (
+        structure[dir].type === 'directory' && structure[dir].contents && (
+          <select
+            key={dir} 
+            onChange={(e) => { window.location.href = e.target.value; }}
+          >
+            <option value="">{dir.slice(1)}</option>
+            {structure[dir].contents.map((page) => (
+              <option key={page} value={`/page${dir}/${page}`}>
+                {page}
+              </option>
+            ))}
+          </select>
+        )
+      ))}
+    </>
+  )
+}
+
 function Page() {
   const [pageContent, setPageContent] = useState('Loading...');
   const location = useLocation(); // To get the current path
@@ -17,12 +54,12 @@ function Page() {
         const path = pagePath == "/" ? "index" : pagePath;
 
         // Make a GET request to your backend with the pagePath
-        const response = await axios.get(`${URL}/page-get`, {
+        const content = await axios.get(`${URL}/page-get`, {
           params: { pagePath: path }
         });
 
         // Set the response data (HTML) to state
-        setPageContent(response.data);
+        setPageContent(content.data);
       } catch (error) {
         console.error('Error fetching page content:', error);
         setPageContent('<p>Failed to load page content.</p>');
@@ -33,7 +70,11 @@ function Page() {
   }, [location]);
 
   return (
-    <div dangerouslySetInnerHTML={{ __html: pageContent }} />
+    <div>
+      <MenuSections />
+
+      <div dangerouslySetInnerHTML={{ __html: pageContent }} />
+    </div>
   );
 }
 
