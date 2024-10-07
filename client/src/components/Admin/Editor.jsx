@@ -82,9 +82,10 @@ function Editor({ structure }) {
             if (element.type === "title") {
                 htmlContent += `<h2>${element.content}</h2>`;
             } else if (element.type === "text") {
-                htmlContent += element.content;
+                htmlContent += `<p>${element.content}</p>`;
             } else if (element.type === "html") {
                 htmlContent += decodeHTML(element.content);
+                htmlContent += "<br />";
             } else if (element.type === "image") {
                 htmlContent += `<img src="${element.content}" alt="image" />`;
             } else if (element.type === "video") {
