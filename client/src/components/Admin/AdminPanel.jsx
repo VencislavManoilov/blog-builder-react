@@ -84,7 +84,7 @@ function AdminPanel() {
                 return (
                     <div key={cleanPath}>
                         {/* Display directory name */}
-                        <strong>{cleanPath}:</strong>
+                        <strong style={{marginRight: "12px"}}>{cleanPath}:</strong>
                         <button onClick={() => handleRename(cleanPath)}>Rename</button>
                         <button onClick={() => handleDelete(cleanPath)}>Delete</button>
                         <div style={{ paddingLeft: "20px" }}>
@@ -93,7 +93,7 @@ function AdminPanel() {
                                 const fullPath = `${cleanPath}/${fileName}`;
                                 return (
                                     <div key={fullPath}>
-                                        <a href={`/page${fullPath}`}>{fileName}</a>
+                                        <a href={`/page${fullPath}`} style={{marginRight: "12px"}}>{fileName}</a>
                                         <button onClick={() => handleRename(fullPath)}>Rename</button>
                                         <button onClick={() => {document.location.href = `/admin/edit${fullPath}`}}>Edit</button>
                                         <button onClick={() => handleDelete(fullPath)}>Delete</button>
@@ -106,7 +106,7 @@ function AdminPanel() {
             } else if (info.type === "file") {
                 return (
                     <div key={cleanPath}>
-                        <a href={`/page${cleanPath}`}>{cleanPath}</a>
+                        <a href={`/page${cleanPath}`} style={{marginRight: "12px"}}>{cleanPath}</a>
                         <button onClick={() => handleRename(cleanPath)}>Rename</button>
                         <button onClick={() => {document.location.href = `/admin/edit${cleanPath}`}}>Edit</button>
                         <button onClick={() => handleDelete(cleanPath)}>Delete</button>
