@@ -3,6 +3,22 @@ const fs = require("fs");
 const path = require("path");
 const router = express.Router();
 
+router.get("/", (req, res) => {
+    const { name } = req.body;
+
+    if(!name) {
+        return res.status(400).json({ error: "No name provided" });
+    }
+
+    const imagePath = path.join(__dirname, "..", "files", "images", name);
+
+    if(fs.existsSync(imagePath)) {
+        return res.sendFile(imagePath)
+    } else {
+        return res.status(400).json({ error: "Image doesn't exist" });
+    }
+})
+
 router.post("/", (req, res) => {
     let imageData = [];
     let filename = '';
