@@ -45,30 +45,26 @@ router.post("/", (req, res) => {
         const buffer = Buffer.concat(imageData); // Combine all chunks
         const savePath = path.join(__dirname, "..", "files", "images", filename);
 
-        fs.access(path.join(__dirname, "..", "files", "images"), fs.constants.F_OK, (err) => {
-            if (err) {
-                // Directory doesn't exist, create it
-                fs.mkdir(path.join(__dirname, "..", "files", "images"), { recursive: true }, (err) => {
-                    if (err) {
-                        console.error('Error creating directory:', err);
-                        return res.status(500).json({ error: "Internal server error" });
-                    }
-                });
-            }
-        });
+        // Ensure the directory exists (synchronously)
+        const imageDir = path.join(__dirname, "..", "files", "images");
 
-        // Write the file using fs
-        fs.writeFile(savePath, buffer, 'binary', err => {
-            if(err) {
-                console.log(err);
-                return res.status(500).json({ error: "Error saving the file." });
+        try {
+            if (!fs.existsSync(imageDir)) {
+                // Synchronously create the directory
+                fs.mkdirSync(imageDir, { recursive: true });
             }
+
+            // Write the file
+            fs.writeFileSync(savePath, buffer, 'binary');
 
             res.json({
-                message: "File uploaded successfully.",
+                message: "Video uploaded successfully.",
                 image: `${filename}`,
             });
-        });
+        } catch (err) {
+            console.error('Error handling file upload:', err);
+            return res.status(500).json({ error: "Internal server error" });
+        }
     });
   
     // Handle any errors in the stream
