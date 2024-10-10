@@ -157,6 +157,9 @@ app.use("/delete/page", (req, res, next) => {
 const Image = require("./routes/Image");
 app.use("/image", Image);
 
+const Video = require("./routes/Video");
+app.use("/video", Video);
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
