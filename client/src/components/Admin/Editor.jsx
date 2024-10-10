@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import ContentEditable from 'react-contenteditable';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
@@ -51,7 +53,7 @@ function Editor({ structure }) {
             newElement = {
                 id: uuidv4(),
                 type,
-                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ? "Enter your html" : type === "image" ? "Image URL" : "Video URL",
+                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ?"Enter your html" : type === "image" ? "Image URL" : "Video URL",
             };
         }
         
@@ -99,6 +101,8 @@ function Editor({ structure }) {
                     });
                     htmlContent += `</select>`;
                 }
+            }else if (element.type === "formated"){
+                htmlContent += element.content;
             }
         });
 
@@ -148,6 +152,7 @@ function Editor({ structure }) {
                 <button onClick={() => addElement("html")}>Add html</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
                 <button onClick={() => addElement("video")}>Add Video</button>
+                <button onClick={() => addElement("formated")}>Add Formated Text</button>
                 <button onClick={() => addElement("menu")}>Add Menu</button>
                 <button onClick={savePage}>Save Page</button>
             </div>
@@ -218,6 +223,25 @@ function Editor({ structure }) {
                                 )}
                             </div>
                         )}
+                        {element.type === "formated" && (
+                            <div>
+                                  <ReactQuill
+                                value={element.content}
+                                onChange={(newContent) => updateElement(element.id, newContent)}
+                                modules={{
+                                    toolbar: [
+                                        [{ header: [1, 2, 3, false] }],
+                                        ['bold', 'italic', 'underline', 'strike'],
+                                        [{ list: 'ordered' }, { list: 'bullet' }],
+                                        ['link', 'image'],
+                                        [{ align: [] }],
+                                        ['clean'],
+                                    ],
+                                }}
+                            />
+                            </div>
+                        )
+                        }
                         <button onClick={() => deleteElement(element.id)}>Delete</button>
                     </div>
                 ))}
