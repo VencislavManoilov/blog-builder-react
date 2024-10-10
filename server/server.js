@@ -7,7 +7,8 @@ const cors = require("cors");
 const app = express();
 const PORT = 8080;
 
-// Middleware for parsing JSON requests
+// Middleware for parsing JSON requests and incoming form-data requests
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Setting the CORS Policy
@@ -152,6 +153,9 @@ app.use("/delete/page", (req, res, next) => {
     req.UPLOADS_DIR = UPLOADS_DIR;
     next();
 }, DeletePage);
+
+const Image = require("./routes/Image");
+app.use("/image", Image);
 
 // Start the server
 app.listen(PORT, () => {
