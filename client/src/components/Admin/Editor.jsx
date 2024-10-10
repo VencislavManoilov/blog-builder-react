@@ -61,8 +61,45 @@ function Editor({ structure }) {
     };
 
     // Updates the content of an element in the schema
-    const updateElement = (id, newContent) => {
-        setSchema(schema.map(el => el.id === id ? { ...el, content: newContent } : el));
+    const updateElement = async (id, newContent, type) => {
+        const formData = new FormData();
+        switch(type) {
+            case "image":
+                formData.append("image", newContent);
+                
+                await axios.post(URL + "/image", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                })
+                .then(response => {
+                    const image = response.data.image;
+                    setSchema(schema.map(el => el.id === id ? { ...el, content: URL + "/image?name=" + image } : el));
+                })
+                .catch(error => {
+                    console.error("Error uploading image:", error);
+                });
+            break;
+            case "video":
+                formData.append("video", newContent);
+                
+                await axios.post(URL + "/video", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                })
+                .then(response => {
+                    const video = response.data.video;
+                    setSchema(schema.map(el => el.id === id ? { ...el, content: URL + "/video?name=" + video } : el));
+                })
+                .catch(error => {
+                    console.error("Error uploading image:", error);
+                });
+            break;
+            default:
+                setSchema(schema.map(el => el.id === id ? { ...el, content: newContent } : el));
+            break;
+        }
     };
 
     // Handles the selection of a directory for the menu
@@ -184,10 +221,9 @@ function Editor({ structure }) {
                         {element.type === "image" && (
                             <div>
                                 <input
-                                    type="text"
-                                    value={element.content}
-                                    onChange={(e) => updateElement(element.id, e.target.value)}
-                                    placeholder="Image URL"
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, e.target.files[0], element.type)}
+                                    placeholder="Choose Image"
                                 />
                                 <img src={element.content} alt="image" style={{ width: "200px", height: "auto" }} />
                             </div>
@@ -195,10 +231,9 @@ function Editor({ structure }) {
                         {element.type === "video" && (
                             <div>
                                 <input
-                                    type="text"
-                                    value={element.content}
-                                    onChange={(e) => updateElement(element.id, e.target.value)}
-                                    placeholder="Video URL"
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, e.target.files[0], element.type)}
+                                    placeholder="Choose Video"
                                 />
                                 <video src={element.content} controls style={{ width: "300px", height: "auto" }} />
                             </div>
@@ -225,20 +260,20 @@ function Editor({ structure }) {
                         )}
                         {element.type === "formated" && (
                             <div>
-                                  <ReactQuill
-                                value={element.content}
-                                onChange={(newContent) => updateElement(element.id, newContent)}
-                                modules={{
-                                    toolbar: [
-                                        [{ header: [1, 2, 3, false] }],
-                                        ['bold', 'italic', 'underline', 'strike'],
-                                        [{ list: 'ordered' }, { list: 'bullet' }],
-                                        ['link', 'image'],
-                                        [{ align: [] }],
-                                        ['clean'],
-                                    ],
-                                }}
-                            />
+                                    <ReactQuill
+                                        value={element.content}
+                                        onChange={(newContent) => updateElement(element.id, newContent)}
+                                        modules={{
+                                            toolbar: [
+                                                [{ header: [1, 2, 3, false] }],
+                                                ['bold', 'italic', 'underline', 'strike'],
+                                                [{ list: 'ordered' }, { list: 'bullet' }],
+                                                ['link', 'image'],
+                                                [{ align: [] }],
+                                                ['clean'],
+                                            ],
+                                        }}
+                                    />
                             </div>
                         )
                         }
