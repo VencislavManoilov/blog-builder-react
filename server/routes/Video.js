@@ -1,10 +1,31 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 const router = express.Router();
 
+// Define the storage configuration for Multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const videoDir = path.join(__dirname, "..", "files", "videos");
+        if (!fs.existsSync(videoDir)) {
+            fs.mkdirSync(videoDir, { recursive: true });
+        }
+        cb(null, videoDir);
+    },
+    filename: (req, file, cb) => {
+        // Generate filename with proper extension
+        const ext = path.extname(file.originalname);
+        const filename = `video-${Date.now()}${ext}`;
+        cb(null, filename);
+    }
+});
+
+// Initialize the Multer middleware
+const upload = multer({ storage: storage });
+
 router.get("/", (req, res) => {
-    const { name } = req.body;
+    const { name } = req.query;
 
     if (!name) {
         return res.status(400).json({ error: "No name provided" });
@@ -19,52 +40,24 @@ router.get("/", (req, res) => {
     }
 });
 
-router.post("/", (req, res) => {
-    let videoData = [];
-    let filename = '';
+router.post("/", upload.single('video'), (req, res) => {
+    try {
+        // The uploaded file will be available as req.file
+        const file = req.file;
 
-    const contentType = req.headers['content-type'];
-
-    if (contentType) {
-        const ext = contentType.split("/")[1]; // Extract 'mp4' from 'video/mp4', etc.
-        filename = `video-${Date.now()}.${ext}`;
-    } else {
-        filename = `file-${Date.now()}.bin`;
-    }
-
-    req.on("data", chunk => {
-        videoData.push(chunk);
-    });
-
-    req.on("end", () => {
-        const buffer = Buffer.concat(videoData);
-        const savePath = path.join(__dirname, "..", "files", "videos", filename);
-
-        // Ensure the directory exists (synchronously)
-        const videosDir = path.join(__dirname, "..", "files", "videos");
-
-        try {
-            if (!fs.existsSync(videosDir)) {
-                // Synchronously create the directory
-                fs.mkdirSync(videosDir, { recursive: true });
-            }
-
-            // Write the file
-            fs.writeFileSync(savePath, buffer, 'binary');
-
-            res.json({
-                message: "Video uploaded successfully.",
-                video: `${filename}`,
-            });
-        } catch (err) {
-            console.error('Error handling file upload:', err);
-            return res.status(500).json({ error: "Internal server error" });
+        if (!file) {
+            return res.status(400).json({ error: "No video uploaded." });
         }
-    });
 
-    req.on("error", () => {
-        res.status(500).json({ error: "Error receiving the file." });
-    });
+        // Respond with the file information (e.g., filename)
+        res.json({
+            message: "Video uploaded successfully.",
+            video: file.filename
+        });
+    } catch (err) {
+        console.error('Error handling video upload:', err);
+        res.status(500).json({ error: "Internal server error" });
+    }
 });
 
 module.exports = router;
