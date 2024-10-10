@@ -101,7 +101,7 @@ function Editor({ structure }) {
                     });
                     htmlContent += `</select>`;
                 }
-            }else if (element.type === "formated"){
+            } else if (element.type === "formated"){
                 htmlContent += element.content;
             }
         });
