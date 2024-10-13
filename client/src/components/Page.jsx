@@ -22,23 +22,25 @@ const MenuSections = () => {
 
   return (
     <>
-      <button onClick={() => {document.location.href = "/"}}>Home</button>
+      <button onClick={() => { document.location.href = "/" }}>Home</button>
       {Object.keys(structure).map((dir) => (
         structure[dir].type === 'directory' ? structure[dir].contents && (
           <select
-            key={dir}
+            key={dir} // Ensures each <select> element has a unique key
             onChange={(e) => { window.location.href = e.target.value; }}
           >
             <option value="">{dir.slice(1)}</option>
-            {structure[dir].contents.map((page) => (
-              <option key={page} value={`/page${dir}/${page}`}>
+            {structure[dir].contents.map((page, index) => (
+              <option key={`${dir}-${page}-${index}`} value={`/page${dir}/${page}`}>
                 {page}
               </option>
             ))}
           </select>
         ) :
-        structure[dir].type === 'file' && dir != "\\index" && (
-          <button onClick={() => {document.location.href = `/page${dir}`}}>{dir.slice(1)}</button>
+        structure[dir].type === 'file' && dir !== "\\index" && (
+          <button key={dir} onClick={() => { document.location.href = `/page${dir}` }}>
+            {dir.slice(1)}
+          </button>
         )
       ))}
     </>
