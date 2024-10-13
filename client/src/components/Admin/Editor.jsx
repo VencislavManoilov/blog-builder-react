@@ -50,11 +50,23 @@ function Editor({ structure }) {
                 content: [], // Will hold the directory's page names
                 selectedDirectory: "", // Stores the selected directory
             };
+        } else if (type === "two_images") {
+            newElement = {
+                id: uuidv4(),
+                type,
+                content: ["Image URL 1", "Image URL 2"],
+            };
+        } else if (type === "four_images") {
+            newElement = {
+                id: uuidv4(),
+                type,
+                content: ["Image URL 1", "Image URL 2", "Image URL 3", "Image URL 4"],
+            };
         } else {
             newElement = {
                 id: uuidv4(),
                 type,
-                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ?"Enter your html" : type === "image" ? "Image URL" : "Video URL",
+                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ? "Enter your html" : type === "formated" ? "" : type === "image" ? "Image URL" : "Video URL",
             };
         }
         
@@ -98,7 +110,26 @@ function Editor({ structure }) {
                 });
             break;
             default:
-                setSchema(schema.map(el => el.id === id ? { ...el, content: newContent } : el));
+                if(type === "two_images" || type === "four_images") {
+                    formData.append("image", newContent.file);
+                
+                    await axios.post(URL + "/image", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
+                    })
+                    .then(response => {
+                        const image = response.data.image;
+                        let content = schema.map(el => el.id === id && el)[0].content;
+                        return setSchema(schema.map(el => el.id === id ? { ...el, content: { ...el.content, [newContent.id]: URL + "/image?name=" + image } } : el));
+                        return;
+                    })
+                    .catch(error => {
+                        return console.error("Error uploading image:", error);
+                    });
+                } else {
+                    setSchema(schema.map(el => el.id === id ? { ...el, content: newContent } : el));
+                }
             break;
         }
     };
@@ -136,6 +167,10 @@ function Editor({ structure }) {
                 htmlContent += "<br />";
             } else if (element.type === "image") {
                 htmlContent += `<img src="${element.content}" alt="image" />`;
+            } else if (element.type === "two_images") {
+                htmlContent += `<div class="two_images"><img src="${element.content[0]}" alt="image" /><img src="${element.content[1]}" alt="image" /></div>`
+            } else if (element.type === "four_images") {
+                htmlContent += `<div class="four_images"><img src="${element.content[0]}" alt="image" /><img src="${element.content[1]}" alt="image" /><img src="${element.content[2]}" alt="image" /><img src="${element.content[3]}" alt="image" /></div>`
             } else if (element.type === "video") {
                 htmlContent += `<video src="${element.content}" controls></video>`;
             } else if (element.type === "menu") {
@@ -197,6 +232,8 @@ function Editor({ structure }) {
                 <button onClick={() => addElement("text")}>Add Text</button>
                 <button onClick={() => addElement("html")}>Add html</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
+                <button onClick={() => addElement("two_images")}>Add Two Images</button>
+                <button onClick={() => addElement("four_images")}>Add Four Images</button>
                 <button onClick={() => addElement("video")}>Add Video</button>
                 <button onClick={() => addElement("formated")}>Add Formated Text</button>
                 <button onClick={() => addElement("menu")}>Add Menu</button>
@@ -237,6 +274,50 @@ function Editor({ structure }) {
                                     placeholder="Choose Image"
                                 />
                                 <img src={element.content} alt="image" style={{ width: "200px", height: "auto" }} />
+                            </div>
+                        )}
+                        {element.type === "two_images" && (
+                            <div>
+                                <input
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, {id: 0, file: e.target.files[0]}, "two_images")}
+                                    placeholder="Choose Image 1"
+                                />
+                                <input
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, {id: 1, file: e.target.files[0]}, "two_images")}
+                                    placeholder="Choose Image 2"
+                                />
+                                <img src={element.content[0]} alt="Image 1" style={{ width: "200px", height: "auto" }} />
+                                <img src={element.content[1]} alt="Image 2" style={{ width: "200px", height: "auto" }} />
+                            </div>
+                        )}
+                        {element.type === "four_images" && (
+                            <div>
+                                <input
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, {id: 0, file: e.target.files[0]}, "four_images")}
+                                    placeholder="Choose Image 1"
+                                />
+                                <input
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, {id: 1, file: e.target.files[0]}, "four_images")}
+                                    placeholder="Choose Image 2"
+                                />
+                                <input
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, {id: 2, file: e.target.files[0]}, "four_images")}
+                                    placeholder="Choose Image 3"
+                                />
+                                <input
+                                    type="file"
+                                    onChange={(e) => updateElement(element.id, {id: 3, file: e.target.files[0]}, "four_images")}
+                                    placeholder="Choose Image 4"
+                                />
+                                <img src={element.content[0]} alt="Image 1" style={{ width: "200px", height: "auto" }} />
+                                <img src={element.content[1]} alt="Image 2" style={{ width: "200px", height: "auto" }} />
+                                <img src={element.content[2]} alt="Image 3" style={{ width: "200px", height: "auto" }} />
+                                <img src={element.content[3]} alt="Image 4" style={{ width: "200px", height: "auto" }} />
                             </div>
                         )}
                         {element.type === "video" && (
