@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import '../../index.css';
 
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
@@ -115,6 +116,14 @@ function Editor({ structure }) {
 
     // Generates static HTML file and saves the schema for future editing
     const savePage = async () => {
+        if(!path) {
+            return alert("You need to specify path");
+        }
+
+        if(schema.length === 0) {
+            return alert("You need to place some content");
+        }
+
         // Create HTML string
         let htmlContent = ``;
         schema.forEach(element => {
@@ -193,6 +202,8 @@ function Editor({ structure }) {
                 <button onClick={() => addElement("menu")}>Add Menu</button>
                 <button onClick={savePage}>Save Page</button>
             </div>
+
+            <div className="line"></div>
 
             <div>
                 {schema.map((element) => (
