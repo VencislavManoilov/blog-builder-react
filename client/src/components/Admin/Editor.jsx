@@ -62,11 +62,20 @@ function Editor({ structure }) {
                 type,
                 content: ["Image URL 1", "Image URL 2", "Image URL 3", "Image URL 4"],
             };
+        } else if (type === "youtube") {
+            newElement = {
+                id: uuidv4(),
+                type,
+                content: {
+                    url: "",
+                    allowFullscreen: false
+                }
+            }
         } else {
             newElement = {
                 id: uuidv4(),
                 type,
-                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ? "Enter your html" : type === "formated" ? "" : type === "image" ? "Image URL" : "Video URL",
+                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ? "Enter your html" : type === "formated" ? "" : type === "image" ? "" : "",
             };
         }
         
@@ -109,6 +118,19 @@ function Editor({ structure }) {
                     console.error("Error uploading image:", error);
                 });
             break;
+            case "youtube":
+                if(newContent?.url) {
+                    // Extract the video ID from the YouTube URL
+                    const youtubeUrl = newContent.url;
+                    const videoIdMatch = youtubeUrl.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})|youtu\.be\/([a-zA-Z0-9_-]{11})/);
+                    const videoId = videoIdMatch ? videoIdMatch[1] || videoIdMatch[2] : null;
+
+                    schema.map(el => el.id === id && console.log(el));
+                    setSchema(schema.map(el => el.id === id ? { ...el, content: {...el.content, url: `https://www.youtube.com/embed/${videoId}`} } : el));
+                } else {
+                    setSchema(schema.map(el => el.id === id ? { ...el, content: {...el.content, allowFullscreen: newContent.allowFullscreen} } : el));
+                }
+            break;
             default:
                 if(type === "two_images" || type === "four_images") {
                     formData.append("image", newContent.file);
@@ -120,9 +142,7 @@ function Editor({ structure }) {
                     })
                     .then(response => {
                         const image = response.data.image;
-                        let content = schema.map(el => el.id === id && el)[0].content;
                         return setSchema(schema.map(el => el.id === id ? { ...el, content: { ...el.content, [newContent.id]: URL + "/image?name=" + image } } : el));
-                        return;
                     })
                     .catch(error => {
                         return console.error("Error uploading image:", error);
@@ -182,8 +202,10 @@ function Editor({ structure }) {
                     });
                     htmlContent += `</select>`;
                 }
-            } else if (element.type === "formated"){
+            } else if (element.type === "formated") {
                 htmlContent += element.content;
+            } else if (element.type === "youtube") {
+                htmlContent += `<iframe width="420" height="250" src=${element.content.url} ${element.content.allowFullscreen ? "allowfullscreen" : ""} ></iframe>`
             }
         });
 
@@ -236,6 +258,7 @@ function Editor({ structure }) {
                 <button onClick={() => addElement("four_images")}>Add Four Images</button>
                 <button onClick={() => addElement("video")}>Add Video</button>
                 <button onClick={() => addElement("formated")}>Add Formated Text</button>
+                <button onClick={() => addElement("youtube")}>YouTube video</button>
                 <button onClick={() => addElement("menu")}>Add Menu</button>
                 <button onClick={savePage}>Save Page</button>
             </div>
@@ -352,23 +375,50 @@ function Editor({ structure }) {
                         )}
                         {element.type === "formated" && (
                             <div>
-                                    <ReactQuill
-                                        value={element.content}
-                                        onChange={(newContent) => updateElement(element.id, newContent)}
-                                        modules={{
-                                            toolbar: [
-                                                [{ header: [1, 2, 3, false] }],
-                                                ['bold', 'italic', 'underline', 'strike'],
-                                                [{ list: 'ordered' }, { list: 'bullet' }],
-                                                ['link', 'image'],
-                                                [{ align: [] }],
-                                                ['clean'],
-                                            ],
+                                <ReactQuill
+                                    value={element.content}
+                                    onChange={(newContent) => updateElement(element.id, newContent)}
+                                    modules={{
+                                        toolbar: [
+                                            [{ header: [1, 2, 3, false] }],
+                                            ['bold', 'italic', 'underline', 'strike'],
+                                            [{ list: 'ordered' }, { list: 'bullet' }],
+                                            ['link', 'image'],
+                                            [{ align: [] }],
+                                            ['clean'],
+                                        ],
+                                    }}
+                                />
+                            </div>
+                        )}
+                        {element.type === "youtube" && (
+                            <div>
+                                <input
+                                    type="text"
+                                    onChange={(e) => { updateElement(element.id, {url: e.target.value}, "youtube"); }}
+                                    placeholder="YouTube URL"
+                                />
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={element.content.allowFullscreen}
+                                        onChange={(e) => {
+                                            updateElement(element.id, { allowFullscreen: e.target.checked }, "youtube");
                                         }}
                                     />
+                                    Allow Fullscreen
+                                </label>
+                                {element.content?.url && (
+                                    <iframe
+                                        width="420"
+                                        height="250"
+                                        key={`${element.content.url}-${element.content.allowFullscreen}`}
+                                        src={element.content.url}
+                                        allowFullScreen={element.content.allowFullscreen} // Conditionally add the allowFullScreen attribute
+                                    />
+                                )}
                             </div>
-                        )
-                        }
+                        )}
                         <button onClick={() => deleteElement(element.id)}>Delete</button>
                     </div>
                 ))}
