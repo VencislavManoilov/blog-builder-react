@@ -71,6 +71,11 @@ function Editor({ structure }) {
                     allowFullscreen: false
                 }
             }
+        } else if (type === "separation") {
+            newElement = {
+                id: uuidv4(),
+                type
+            }
         } else {
             newElement = {
                 id: uuidv4(),
@@ -186,7 +191,7 @@ function Editor({ structure }) {
                 htmlContent += decodeHTML(element.content);
                 htmlContent += "<br />";
             } else if (element.type === "image") {
-                htmlContent += `<img src="${element.content}" alt="image" />`;
+                htmlContent += `<img class="one_image" src="${element.content}" alt="image" />`;
             } else if (element.type === "two_images") {
                 htmlContent += `<div class="two_images"><img src="${element.content[0]}" alt="image" /><img src="${element.content[1]}" alt="image" /></div>`
             } else if (element.type === "four_images") {
@@ -205,7 +210,9 @@ function Editor({ structure }) {
             } else if (element.type === "formated") {
                 htmlContent += element.content;
             } else if (element.type === "youtube") {
-                htmlContent += `<iframe width="420" height="250" src=${element.content.url} ${element.content.allowFullscreen ? "allowfullscreen" : ""} ></iframe>`
+                htmlContent += `<iframe width="420" height="250" src=${element.content.url} ${element.content.allowFullscreen ? "allowfullscreen" : ""} ></iframe><br />`
+            } else if (element.type === "separation") {
+                htmlContent += "<div class='line'></div>";
             }
         });
 
@@ -253,6 +260,7 @@ function Editor({ structure }) {
                 <button onClick={() => addElement("title")}>Add Title</button>
                 <button onClick={() => addElement("text")}>Add Text</button>
                 <button onClick={() => addElement("html")}>Add html</button>
+                <button onClick={() => addElement("separation")}>Add separation line</button>
                 <button onClick={() => addElement("image")}>Add Image</button>
                 <button onClick={() => addElement("two_images")}>Add Two Images</button>
                 <button onClick={() => addElement("four_images")}>Add Four Images</button>
@@ -418,6 +426,9 @@ function Editor({ structure }) {
                                     />
                                 )}
                             </div>
+                        )}
+                        {element.type === "separation" && (
+                            <div className="line"></div>
                         )}
                         <button onClick={() => deleteElement(element.id)}>Delete</button>
                     </div>
