@@ -3,11 +3,54 @@ import { useParams } from "react-router-dom";
 import ContentEditable from 'react-contenteditable';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import ReactQuill from 'react-quill';
+import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '../../index.css';
 
 const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+
+// Register fonts
+const Font = Quill.import('formats/font');
+Font.whitelist = ['arial', 'times-new-roman', 'courier-new', 'verdana', 'georgia', 'trebuchet-ms', 'comic-sans-ms', 'impact'];
+Quill.register(Font, true);
+
+const MyCustomToolbar = () => (
+    <div id="toolbar">
+        <select className="ql-font">
+            <option value="">Normal</option>
+            <option value="arial">Arial</option>
+            <option value="times-new-roman">Times New Roman</option>
+            <option value="courier-new">Courier New</option>
+            <option value="verdana">Verdana</option>
+            <option value="georgia">Georgia</option>
+            <option value="trebuchet-ms">Trebuchet MS</option>
+            <option value="comic-sans-ms">Comic Sans MS</option>
+            <option value="impact">Impact</option>
+        </select>
+        <select className="ql-header" defaultValue="">
+            <option value="">Normal</option>
+            <option value="1">Header 1</option>
+            <option value="2">Header 2</option>
+            <option value="3">Header 3</option>
+        </select>
+        <button className="ql-bold" />
+        <button className="ql-italic" />
+        <button className="ql-underline" />
+        <button className="ql-strike" />
+        <button className="ql-list" value="ordered" />
+        <button className="ql-list" value="bullet" />
+        <button className="ql-link" />
+        <button className="ql-image" />
+        <select className="ql-align" defaultValue="">
+            <option value="" />
+            <option value="left" />
+            <option value="center" />
+            <option value="right" />
+            <option value="justify" />
+        </select>
+        <button className="ql-clean" />
+    </div>
+);
 
 function Editor({ structure }) {
     const { '*': editPath } = useParams();
@@ -15,6 +58,9 @@ function Editor({ structure }) {
     const [schema, setSchema] = useState([]);
     const [title, setTitle] = useState("Untitled Page");
     const [path, setPath] = useState("");
+
+    useEffect(() => {
+    }, []);
 
     useEffect(() => {
         if (editPath && editPath !== "create") {
@@ -383,19 +429,18 @@ function Editor({ structure }) {
                         )}
                         {element.type === "formated" && (
                             <div>
+                                <MyCustomToolbar /> {/* Include the custom toolbar */}
                                 <ReactQuill
                                     value={element.content}
                                     onChange={(newContent) => updateElement(element.id, newContent)}
                                     modules={{
-                                        toolbar: [
-                                            [{ header: [1, 2, 3, false] }],
-                                            ['bold', 'italic', 'underline', 'strike'],
-                                            [{ list: 'ordered' }, { list: 'bullet' }],
-                                            ['link', 'image'],
-                                            [{ align: [] }],
-                                            ['clean'],
-                                        ],
+                                        toolbar: {
+                                            container: '#toolbar', // Use the custom toolbar
+                                        },
                                     }}
+                                    formats={[
+                                        'font', 'header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'link', 'image', 'align'
+                                    ]}
                                 />
                             </div>
                         )}

@@ -38,3 +38,36 @@
     width: 250px;
     height: fit-content; /* Keeps the aspect ratio */
 }
+
+.ql-align-center {
+    text-align: center;
+}
+
+.ql-align-right {
+    text-align: end;
+}
+
+.ql-font-arial {
+    font-family: Arial, sans-serif;
+}
+.ql-font-times-new-roman {
+    font-family: 'Times New Roman', serif;
+}
+.ql-font-courier-new {
+    font-family: 'Courier New', monospace;
+}
+.ql-font-verdana {
+    font-family: Verdana, sans-serif;
+}
+.ql-font-georgia {
+    font-family: Georgia, serif;
+}
+.ql-font-trebuchet-ms {
+    font-family: 'Trebuchet MS', sans-serif;
+}
+.ql-font-comic-sans-ms {
+    font-family: 'Comic Sans MS', cursive;
+}
+.ql-font-impact {
+    font-family: Impact, sans-serif;
+}
