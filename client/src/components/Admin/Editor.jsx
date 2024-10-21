@@ -60,9 +60,6 @@ function Editor({ structure }) {
     const [path, setPath] = useState("");
 
     useEffect(() => {
-    }, []);
-
-    useEffect(() => {
         if (editPath && editPath !== "create") {
             const fetchPage = async () => {
                 try {
@@ -126,7 +123,7 @@ function Editor({ structure }) {
             newElement = {
                 id: uuidv4(),
                 type,
-                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "html" ? "Enter your html" : type === "formated" ? "" : type === "image" ? "" : "",
+                content: type === "title" ? "Enter Title" : type === "text" ? "Enter your text" : type === "formated" ? "Type here"  : type === "html" ? "Enter your html" : type === "formated" ? "" : type === "image" ? "" : "",
             };
         }
         
@@ -283,26 +280,29 @@ function Editor({ structure }) {
     };
 
     return (
-        <div>
-            <button onClick={() => { document.location.href = "/admin" }}>Home</button>
+        <div className="Setting_buttons">
+            
             <br />
             <br />
 
             <div>
                 <input
+                    id="Page_Title"
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Page Title"
-                    style={{ fontSize: "24px", marginBottom: "20px", display: "block" }}
+                    style={{ display: "block" }}
                 />
                 <input
+                    id="Path_Input"
                     type="text"
                     value={path}
                     onChange={(e) => setPath(e.target.value)}
                     placeholder="Path (e.g., pateta or about-us/our-team)"
-                    style={{ marginBottom: "20px", display: "block" }}
+                    style={{display: "block" }}
                 />
+                <div className="Add_buttons">
                 <button onClick={() => addElement("title")}>Add Title</button>
                 <button onClick={() => addElement("text")}>Add Text</button>
                 <button onClick={() => addElement("html")}>Add html</button>
@@ -314,19 +314,22 @@ function Editor({ structure }) {
                 <button onClick={() => addElement("formated")}>Add Formated Text</button>
                 <button onClick={() => addElement("youtube")}>YouTube video</button>
                 <button onClick={() => addElement("menu")}>Add Menu</button>
-                <button onClick={savePage}>Save Page</button>
+                </div>
+                <button id="Save_button" onClick={savePage}>Save Page</button>
+                <button id="home_button" onClick={() => { document.location.href = "/admin" }}>Home</button>
             </div>
 
             <div className="line"></div>
 
             <div>
                 {schema.map((element) => (
-                    <div key={element.id} style={{ marginBottom: "20px" }}>
+                    <div key={element.id}>
                         {element.type === "title" && (
                             <ContentEditable
                                 html={element.content}
                                 onChange={(e) => updateElement(element.id, e.target.value)}
                                 tagName="h2"
+                                id="Added_Title"
                             />
                         )}
                         {element.type === "text" && (
@@ -334,6 +337,7 @@ function Editor({ structure }) {
                                 html={element.content}
                                 onChange={(e) => updateElement(element.id, e.target.value)}
                                 tagName="p"
+                                id="Added_Text"
                             />
                         )}
                         {element.type === "html" && (
@@ -341,76 +345,97 @@ function Editor({ structure }) {
                                 html={element.content}
                                 onChange={(e) => updateElement(element.id, e.target.value)}
                                 tagName="p"
+                                id="Added_Html"
                             />
                         )}
                         {element.type === "image" && (
-                            <div>
+                            <div id="Added_One_Image">
+
+                                <img id="Added_One_Image_img" src={element.content} alt="image"  />
+                                <br></br>
                                 <input
+                                    id="Added_One_Image_file"
                                     type="file"
                                     onChange={(e) => updateElement(element.id, e.target.files[0], element.type)}
                                     placeholder="Choose Image"
-                                />
-                                <img src={element.content} alt="image" style={{ width: "200px", height: "auto" }} />
+                                    />
+                                
                             </div>
                         )}
                         {element.type === "two_images" && (
-                            <div>
+                            <div id="Added_Two_Images">
+                                <img id="Added_Two_Images_img_one" src={element.content[0]} alt="Image 1"/>
+                                <img id="Added_Two_Images_img_two" src={element.content[1]} alt="Image 2"/>
+
+                                <br></br>
+
                                 <input
                                     type="file"
                                     onChange={(e) => updateElement(element.id, {id: 0, file: e.target.files[0]}, "two_images")}
                                     placeholder="Choose Image 1"
+                                    id="Added_Two_Images_file_one"
                                 />
                                 <input
                                     type="file"
                                     onChange={(e) => updateElement(element.id, {id: 1, file: e.target.files[0]}, "two_images")}
                                     placeholder="Choose Image 2"
+                                    id="Added_Two_Images_file_two"
                                 />
-                                <img src={element.content[0]} alt="Image 1" style={{ width: "200px", height: "auto" }} />
-                                <img src={element.content[1]} alt="Image 2" style={{ width: "200px", height: "auto" }} />
+                                
                             </div>
                         )}
                         {element.type === "four_images" && (
-                            <div>
-                                <input
+                            <div id="Added_Four_Images">
+                                <img id="Added_Four_Images_img_one" src={element.content[0]} alt="Image 1"/>
+                                <img id="Added_Four_Images_img_two" src={element.content[1]} alt="Image 2"/>
+                                <br></br>
+                                <img id="Added_Four_Images_img_three" src={element.content[2]} alt="Image 3"/>
+                                <img id="Added_Four_Images_img_four" src={element.content[3]} alt="Image 4"/>
+                                <br></br>
+                                <input 
                                     type="file"
                                     onChange={(e) => updateElement(element.id, {id: 0, file: e.target.files[0]}, "four_images")}
                                     placeholder="Choose Image 1"
+                                    id="Added_Four_Images_file_one"
                                 />
                                 <input
                                     type="file"
                                     onChange={(e) => updateElement(element.id, {id: 1, file: e.target.files[0]}, "four_images")}
                                     placeholder="Choose Image 2"
+                                    id="Added_Four_Images_file_two"
                                 />
                                 <input
                                     type="file"
                                     onChange={(e) => updateElement(element.id, {id: 2, file: e.target.files[0]}, "four_images")}
                                     placeholder="Choose Image 3"
+                                    id="Added_Four_Images_file_three"
                                 />
                                 <input
                                     type="file"
                                     onChange={(e) => updateElement(element.id, {id: 3, file: e.target.files[0]}, "four_images")}
                                     placeholder="Choose Image 4"
+                                    id="Added_Four_Images_file_four"
                                 />
-                                <img src={element.content[0]} alt="Image 1" style={{ width: "200px", height: "auto" }} />
-                                <img src={element.content[1]} alt="Image 2" style={{ width: "200px", height: "auto" }} />
-                                <img src={element.content[2]} alt="Image 3" style={{ width: "200px", height: "auto" }} />
-                                <img src={element.content[3]} alt="Image 4" style={{ width: "200px", height: "auto" }} />
+                                
                             </div>
                         )}
                         {element.type === "video" && (
-                            <div>
+                            <div id="Added_Video">
+                                <video id="Added_Video_vid" src={element.content} controls />
+                                <br></br>
                                 <input
+                                    id="Added_Video_file"
                                     type="file"
                                     onChange={(e) => updateElement(element.id, e.target.files[0], element.type)}
                                     placeholder="Choose Video"
                                 />
-                                <video src={element.content} controls style={{ width: "300px", height: "auto" }} />
+                                
                             </div>
                         )}
                         {element.type === "menu" && (
-                            <div>
+                            <div id="Added_menu">
                                 <label>Select Directory: </label>
-                                <select value={element.selectedDirectory} onChange={(e) => selectDirectory(element.id, e.target.value)}>
+                                <select id="Added_menu_select" value={element.selectedDirectory} onChange={(e) => selectDirectory(element.id, e.target.value)}>
                                     <option value="">Select a directory</option>
                                     {Object.keys(structure).map((dir) => (
                                         structure[dir].type === "directory" && (
@@ -428,7 +453,7 @@ function Editor({ structure }) {
                             </div>
                         )}
                         {element.type === "formated" && (
-                            <div>
+                            <div id="Added_Formated">
                                 <MyCustomToolbar /> {/* Include the custom toolbar */}
                                 <ReactQuill
                                     value={element.content}
@@ -438,21 +463,31 @@ function Editor({ structure }) {
                                             container: '#toolbar', // Use the custom toolbar
                                         },
                                     }}
-                                    formats={[
-                                        'font', 'header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'link', 'image', 'align'
-                                    ]}
                                 />
                             </div>
                         )}
                         {element.type === "youtube" && (
-                            <div>
+                            <div id="Added_YouTube">
+                                {element.content?.url && (
+                                    <iframe
+                                        id="Added_YouTube_vid"
+                                        width="420"
+                                        height="250"
+                                        key={`${element.content.url}-${element.content.allowFullscreen}`}
+                                        src={element.content.url}
+                                        allowFullScreen={element.content.allowFullscreen} // Conditionally add the allowFullScreen attribute
+                                    />
+                                )}
+                                <br></br>
                                 <input
+                                    id="Added_YouTube_link"
                                     type="text"
                                     onChange={(e) => { updateElement(element.id, {url: e.target.value}, "youtube"); }}
                                     placeholder="YouTube URL"
                                 />
                                 <label>
                                     <input
+                                        id="Added_YouTube_allow"
                                         type="checkbox"
                                         checked={element.content.allowFullscreen}
                                         onChange={(e) => {
@@ -461,21 +496,12 @@ function Editor({ structure }) {
                                     />
                                     Allow Fullscreen
                                 </label>
-                                {element.content?.url && (
-                                    <iframe
-                                        width="420"
-                                        height="250"
-                                        key={`${element.content.url}-${element.content.allowFullscreen}`}
-                                        src={element.content.url}
-                                        allowFullScreen={element.content.allowFullscreen} // Conditionally add the allowFullScreen attribute
-                                    />
-                                )}
                             </div>
                         )}
                         {element.type === "separation" && (
                             <div className="line"></div>
                         )}
-                        <button onClick={() => deleteElement(element.id)}>Delete</button>
+                        <button id="Delete_button" onClick={() => deleteElement(element.id)}>Delete</button>
                     </div>
                 ))}
             </div>
