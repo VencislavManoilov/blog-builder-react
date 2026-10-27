@@ -6,7 +6,7 @@
 
 Make sure you have the following installed on your machine:
 
-- [Node.js](https://nodejs.org/) (includes npm)
+- [Node.js](https://nodejs.org/) 22.13 or newer (includes npm)
 
 ### Running the Project
 

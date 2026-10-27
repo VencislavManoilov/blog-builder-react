@@ -3,7 +3,7 @@ import Editor from "./Editor";
 import axios from "axios";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+const URL = import.meta.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 function AdminPanel() {
     const [structure, setStruct] = useState({});

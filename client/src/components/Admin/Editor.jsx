@@ -7,7 +7,7 @@ import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '../../index.css';
 
-const URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
+const URL = import.meta.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 // Register fonts
 const Font = Quill.import('formats/font');
